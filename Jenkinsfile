@@ -31,7 +31,7 @@ pipeline {
                     sh 'docker rmi -f ${IMAGE_NAME}:${IMAGE_TAG} || true'
                 }
 
-                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f ${WORK_DIR}/Dockerfile ${WORK_DIR}'
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG}'
             }
         }
 
