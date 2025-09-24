@@ -16,22 +16,22 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/Manikanta18vk/onlinebookstore.git'
             }
         }
-	stage('Build package') {
-		steps {
-			sh 'mvn clean package'
-	}
-	}
+
+        stage('Build Package') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                
-                        docker rmi -f ${IMAGE_NAME}:${IMAGE_TAG} || true
-                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f ${WORK_DIR}/Dockerfile ${WORK_DIR}
-                        docker logout
-                    '''
+                script {
+                    // Only remove image if it exists
+                    sh 'docker image inspect ${IMAGE_NAME}:${IMAGE_TAG} >/dev/null 2>&1 || true'
+                    sh 'docker rmi -f ${IMAGE_NAME}:${IMAGE_TAG} || true'
                 }
+
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f ${WORK_DIR}/Dockerfile ${WORK_DIR}'
             }
         }
 
@@ -43,7 +43,7 @@ pipeline {
                 '''
             }
         }
-         
+
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -55,6 +55,14 @@ pipeline {
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Cleaning up..."
+            sh 'docker rm -f ${CONTAINER_NAME} || true'
+            sh 'docker rmi -f ${IMAGE_NAME}:${IMAGE_TAG} || true'
         }
     }
 }
