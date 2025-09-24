@@ -26,12 +26,13 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Only remove image if it exists
+                    // Try removing existing image (no fail if missing)
                     sh 'docker image inspect ${IMAGE_NAME}:${IMAGE_TAG} >/dev/null 2>&1 || true'
                     sh 'docker rmi -f ${IMAGE_NAME}:${IMAGE_TAG} || true'
                 }
 
-                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG}'
+                // Build Docker image from the workspace
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f ${WORK_DIR}/Dockerfile ${WORK_DIR}'
             }
         }
 
@@ -60,7 +61,7 @@ pipeline {
 
     post {
         always {
-            echo "Cleaning up..."
+            echo "🧹 Cleaning up Docker resources..."
             sh 'docker rm -f ${CONTAINER_NAME} || true'
             sh 'docker rmi -f ${IMAGE_NAME}:${IMAGE_TAG} || true'
         }
