@@ -7,7 +7,7 @@ pipeline {
         IMAGE_TAG       = "latest"
         CONTAINER_NAME  = "online-container"
         HOST_PORT       = "3000"
-        DOCKERHUB_REPO  = "Manikanta1319"
+        DOCKERHUB_REPO  = "manikanta1319"
     }
 
     stages {
