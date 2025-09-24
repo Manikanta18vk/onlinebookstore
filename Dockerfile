@@ -1,5 +1,9 @@
-FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY target/onlinebookstore-0.0.1-SNAPSHOT.jar app.jar
+FROM tomcat:9.0-jdk17
+
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
+
+COPY target/onlinebookstore.war /usr/local/tomcat/webapps/ROOT.war
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+CMD ["catalina.sh", "run"]
